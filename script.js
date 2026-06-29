@@ -1,7 +1,3 @@
-// ==============================
-// Firebase setup (COMPAT MODE)
-// ==============================
-
 const firebaseConfig = {
   apiKey: "AIzaSyDFC_FzA8r_TD03grYSGGfFubsE90xdU2s",
   authDomain: "twitch-knobs.firebaseapp.com",
@@ -17,10 +13,6 @@ const db = firebase.database();
 
 console.log("Firebase connected");
 
-// ==============================
-// CONFIG
-// ==============================
-
 const channels = ["vox", "bass", "guitar", "snare"];
 
 const controls = [
@@ -32,35 +24,33 @@ const controls = [
   { key: "y", label: "Y Tweak", min: 1, max: 5 }
 ];
 
-// ==============================
-// BUILD UI
-// ==============================
-
 const app = document.getElementById("app");
 
 function createSlider(channel, control) {
   const wrapper = document.createElement("div");
 
   const id = `${channel}-${control.key}`;
+  const path = `${channel}/${control.key}`;
 
   wrapper.innerHTML = `
-    <label>${control.label}: <span id="${id}-val"></span></label>
+    <label>${control.label}: <span id="${id}-val">0</span></label>
     <input type="range" min="${control.min}" max="${control.max}" value="${control.min}" id="${id}">
   `;
 
   const slider = wrapper.querySelector("input");
   const valueText = wrapper.querySelector("span");
 
-  const path = `${channel}/${control.key}`;
-
-  // Send to Firebase
+  // Smooth UI update ONLY (no Firebase spam here)
   slider.addEventListener("input", () => {
-    const val = Number(slider.value);
-    valueText.textContent = val;
-    db.ref(path).set(val);
+    valueText.textContent = slider.value;
   });
 
-  // Listen for updates
+  // REAL update only when user releases slider
+  slider.addEventListener("change", () => {
+    db.ref(path).set(Number(slider.value));
+  });
+
+  // Sync from Firebase
   db.ref(path).on("value", (snap) => {
     const val = snap.val();
     if (val !== null) {
@@ -81,9 +71,7 @@ function createPanel(channel) {
 
   panel.appendChild(title);
 
-  controls.forEach(control => {
-    panel.appendChild(createSlider(channel, control));
-  });
+  controls.forEach(c => panel.appendChild(createSlider(channel, c)));
 
   app.appendChild(panel);
 }

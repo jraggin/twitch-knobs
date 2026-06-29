@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+}
+
+#app {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.panel {
+    background: #1c1c1c;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+.panel h2 {
+    margin-top: 0;
+    color: #00ffcc;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+input[type="range"] {
+    width: 100%;
+}

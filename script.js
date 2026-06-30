@@ -1,25 +1,27 @@
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDFC_FzA8r_TD03grYSGGfFubsE90xdU2s",
+  authDomain: "twitch-knobs.firebaseapp.com",
+  databaseURL: "https://twitch-knobs-default-rtdb.firebaseio.com",
+  projectId: "twitch-knobs",
+  storageBucket: "twitch-knobs.firebasestorage.app",
+  messagingSenderId: "172717259045",
+  appId: "1:172717259045:web:1f1c901facb66410fc82cc"
 };
 
 // INIT FIREBASE
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-console.log("Sliders connected to Firebase");
+console.log("Sliders initialized");
 
 // -----------------------------
-// CONFIG
+// CHANNELS
 // -----------------------------
-
 const channels = ["vox", "bass", "guitar", "snare"];
 
+// -----------------------------
+// CONTROLS
+// -----------------------------
 const controls = [
   { key: "r", label: "Red", min: 0, max: 1, step: 0.001 },
   { key: "g", label: "Green", min: 0, max: 1, step: 0.001 },
@@ -32,15 +34,17 @@ const controls = [
 const app = document.getElementById("app");
 
 // -----------------------------
-// HELPERS
+// FORMAT DISPLAY
 // -----------------------------
-
-function formatValue(control, value) {
+function format(control, value) {
   if (control.step === 1) return Math.round(value);
   return Number(value).toFixed(3);
 }
 
-function createControl(channel, control) {
+// -----------------------------
+// CREATE SLIDER
+// -----------------------------
+function createSlider(channel, control) {
   const wrapper = document.createElement("div");
   wrapper.className = "control";
 
@@ -52,7 +56,7 @@ function createControl(channel, control) {
   wrapper.innerHTML = `
     <div class="label-row">
       <span>${control.label}</span>
-      <span class="value" id="${id}-val">${formatValue(control, defaultValue)}</span>
+      <span class="value" id="${id}-val">${format(control, defaultValue)}</span>
     </div>
 
     <input
@@ -66,19 +70,14 @@ function createControl(channel, control) {
   `;
 
   const slider = wrapper.querySelector("input");
-  const valueText = wrapper.querySelector(".value");
+  const display = wrapper.querySelector(".value");
 
   // -----------------------------
   // SEND TO FIREBASE (SMOOTH)
   // -----------------------------
   slider.addEventListener("input", () => {
-    let value = Number(slider.value);
-
-    // safety clamp
-    value = Math.min(control.max, Math.max(control.min, value));
-
-    valueText.textContent = formatValue(control, value);
-
+    const value = Number(slider.value);
+    display.textContent = format(control, value);
     db.ref(path).set(value);
   });
 
@@ -93,7 +92,7 @@ function createControl(channel, control) {
 
     if (!isNaN(num)) {
       slider.value = num;
-      valueText.textContent = formatValue(control, num);
+      display.textContent = format(control, num);
     }
   });
 
@@ -101,9 +100,8 @@ function createControl(channel, control) {
 }
 
 // -----------------------------
-// BUILD UI
+// CREATE PANEL
 // -----------------------------
-
 function createPanel(channel) {
   const panel = document.createElement("div");
   panel.className = "panel";
@@ -114,10 +112,13 @@ function createPanel(channel) {
   panel.appendChild(title);
 
   controls.forEach(control => {
-    panel.appendChild(createControl(channel, control));
+    panel.appendChild(createSlider(channel, control));
   });
 
   app.appendChild(panel);
 }
 
+// -----------------------------
+// INIT APP
+// -----------------------------
 channels.forEach(createPanel);

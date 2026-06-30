@@ -1,130 +1,147 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyDFC_FzA8r_TD03grYSGGfFubsE90xdU2s",
-  authDomain: "twitch-knobs.firebaseapp.com",
-  databaseURL: "https://twitch-knobs-default-rtdb.firebaseio.com",
-  projectId: "twitch-knobs",
-  storageBucket: "twitch-knobs.firebasestorage.app",
-  messagingSenderId: "172717259045",
-  appId: "1:172717259045:web:1f1c901facb66410fc82cc"
-};
+/* ===== Global ===== */
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-console.log("Firebase connected");
-
-const channels = ["vox", "bass", "guitar", "snare"];
-
-const controls = [
-  {
-    key: "r",
-    label: "Red",
-    min: 1,
-    max: 5,
-    step: 0.01
-  },
-  {
-    key: "g",
-    label: "Green",
-    min: 1,
-    max: 5,
-    step: 0.01
-  },
-  {
-    key: "b",
-    label: "Blue",
-    min: 1,
-    max: 5,
-    step: 0.01
-  },
-  {
-    key: "div",
-    label: "Divisions",
-    min: 2,
-    max: 10,
-    step: 1
-  },
-  {
-    key: "x",
-    label: "X Tweak",
-    min: 1,
-    max: 5,
-    step: 0.01
-  },
-  {
-    key: "y",
-    label: "Y Tweak",
-    min: 1,
-    max: 5,
-    step: 0.01
-  }
-];
-
-const app = document.getElementById("app");
-
-function formatValue(control, value) {
-  if (control.step === 1) {
-    return Number(value);
-  }
-  return Number(value).toFixed(2);
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-function createSlider(channel, control) {
-  const wrapper = document.createElement("div");
+body {
+    background: #181818;
+    color: #f2f2f2;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 30px;
+}
 
-  const id = `${channel}-${control.key}`;
-  const path = `${channel}/${control.key}`;
+/* ===== Header ===== */
 
-  wrapper.innerHTML = `
-    <label>${control.label}: <span id="${id}-val">${formatValue(control, control.min)}</span></label>
-    <input
-      type="range"
-      id="${id}"
-      min="${control.min}"
-      max="${control.max}"
-      step="${control.step}"
-      value="${control.min}">
-  `;
+header {
+    text-align: center;
+    margin-bottom: 35px;
+}
 
-  const slider = wrapper.querySelector("input");
-  const valueText = wrapper.querySelector("span");
+header h1 {
+    font-size: 42px;
+    margin-bottom: 8px;
+    color: #ffffff;
+}
 
-  // Update display and Firebase continuously while dragging
-  slider.addEventListener("input", () => {
-    const value = Number(slider.value);
+header p {
+    color: #999;
+    font-size: 18px;
+}
 
-    valueText.textContent = formatValue(control, value);
+/* ===== Layout ===== */
 
-    db.ref(path).set(value);
-  });
+#app {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 25px;
+}
 
-  // Keep synced with Firebase
-  db.ref(path).on("value", (snap) => {
-    const val = snap.val();
+/* ===== Channel Panel ===== */
 
-    if (val !== null && Number(slider.value) !== val) {
-      slider.value = val;
-      valueText.textContent = formatValue(control, val);
+.panel {
+    background: #252525;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 0 18px rgba(0,0,0,.35);
+}
+
+.panel h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+/* ===== Slider Rows ===== */
+
+.slider-row {
+    margin-bottom: 18px;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.slider-header label {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.value {
+    color: #66d9ff;
+    font-family: monospace;
+    min-width: 60px;
+    text-align: right;
+}
+
+/* ===== Slider ===== */
+
+input[type=range] {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+/* Chrome */
+
+input[type=range]::-webkit-slider-runnable-track {
+    height: 8px;
+    background: #444;
+    border-radius: 4px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #00c8ff;
+    cursor: pointer;
+    transition: .15s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+/* Firefox */
+
+input[type=range]::-moz-range-track {
+    height: 8px;
+    background: #444;
+    border-radius: 4px;
+}
+
+input[type=range]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: #00c8ff;
+    cursor: pointer;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 18px;
     }
-  });
 
-  return wrapper;
+    header h1 {
+        font-size: 32px;
+    }
+
+    #app {
+        grid-template-columns: 1fr;
+    }
+
 }
-
-function createPanel(channel) {
-  const panel = document.createElement("div");
-  panel.className = "panel";
-
-  const title = document.createElement("h2");
-  title.textContent = channel.toUpperCase();
-
-  panel.appendChild(title);
-
-  controls.forEach(control => {
-    panel.appendChild(createSlider(channel, control));
-  });
-
-  app.appendChild(panel);
-}
-
-channels.forEach(createPanel);

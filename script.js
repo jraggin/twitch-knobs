@@ -13,29 +13,6 @@ const db = firebase.database();
 
 console.log("Firebase connected");
 
-/* =========================
-   STREAMER.BOT CONNECTION
-   ========================= */
-
-// IMPORTANT: use localhost for testing on same PC
-const ws = new WebSocket("ws://localhost:8080");
-
-ws.addEventListener("open", () => {
-  console.log("Streamer.bot WebSocket CONNECTED");
-});
-
-ws.addEventListener("error", (err) => {
-  console.log("Streamer.bot WebSocket ERROR", err);
-});
-
-ws.addEventListener("close", () => {
-  console.log("Streamer.bot WebSocket CLOSED");
-});
-
-/* =========================
-   YOUR CONTROLS
-   ========================= */
-
 const channels = ["vox", "bass", "guitar", "snare"];
 
 const controls = [
@@ -68,30 +45,12 @@ function createSlider(channel, control) {
     valueText.textContent = slider.value;
   });
 
-  // Firebase update
+  // Firebase update on release
   slider.addEventListener("change", () => {
-    const val = Number(slider.value);
-    db.ref(path).set(val);
-
-    // OPTIONAL: send directly to Streamer.bot
-    if (ws.readyState === 1) {
-      ws.send(JSON.stringify({
-        request: "DoAction",
-        action: "Set Knob Value",
-        args: {
-          channel,
-          control: control.key,
-          value: val
-        }
-      }));
-
-      console.log("Sent to Streamer.bot:", path, val);
-    } else {
-      console.log("WebSocket not ready yet");
-    }
+    db.ref(path).set(Number(slider.value));
   });
 
-  // Firebase sync
+  // Sync from Firebase
   db.ref(path).on("value", (snap) => {
     const val = snap.val();
     if (val !== null) {

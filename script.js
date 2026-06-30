@@ -16,15 +16,58 @@ console.log("Firebase connected");
 const channels = ["vox", "bass", "guitar", "snare"];
 
 const controls = [
-  { key: "r", label: "Red", min: 1, max: 5 },
-  { key: "g", label: "Green", min: 1, max: 5 },
-  { key: "b", label: "Blue", min: 1, max: 5 },
-  { key: "div", label: "Divisions", min: 2, max: 10 },
-  { key: "x", label: "X Tweak", min: 1, max: 5 },
-  { key: "y", label: "Y Tweak", min: 1, max: 5 }
+  {
+    key: "r",
+    label: "Red",
+    min: 1,
+    max: 5,
+    step: 0.01
+  },
+  {
+    key: "g",
+    label: "Green",
+    min: 1,
+    max: 5,
+    step: 0.01
+  },
+  {
+    key: "b",
+    label: "Blue",
+    min: 1,
+    max: 5,
+    step: 0.01
+  },
+  {
+    key: "div",
+    label: "Divisions",
+    min: 2,
+    max: 10,
+    step: 1
+  },
+  {
+    key: "x",
+    label: "X Tweak",
+    min: 1,
+    max: 5,
+    step: 0.01
+  },
+  {
+    key: "y",
+    label: "Y Tweak",
+    min: 1,
+    max: 5,
+    step: 0.01
+  }
 ];
 
 const app = document.getElementById("app");
+
+function formatValue(control, value) {
+  if (control.step === 1) {
+    return Number(value);
+  }
+  return Number(value).toFixed(2);
+}
 
 function createSlider(channel, control) {
   const wrapper = document.createElement("div");
@@ -33,29 +76,35 @@ function createSlider(channel, control) {
   const path = `${channel}/${control.key}`;
 
   wrapper.innerHTML = `
-    <label>${control.label}: <span id="${id}-val">0</span></label>
-    <input type="range" min="${control.min}" max="${control.max}" value="${control.min}" id="${id}">
+    <label>${control.label}: <span id="${id}-val">${formatValue(control, control.min)}</span></label>
+    <input
+      type="range"
+      id="${id}"
+      min="${control.min}"
+      max="${control.max}"
+      step="${control.step}"
+      value="${control.min}">
   `;
 
   const slider = wrapper.querySelector("input");
   const valueText = wrapper.querySelector("span");
 
-  // UI update only
+  // Update display and Firebase continuously while dragging
   slider.addEventListener("input", () => {
-    valueText.textContent = slider.value;
+    const value = Number(slider.value);
+
+    valueText.textContent = formatValue(control, value);
+
+    db.ref(path).set(value);
   });
 
-  // Firebase update on release
-  slider.addEventListener("change", () => {
-    db.ref(path).set(Number(slider.value));
-  });
-
-  // Sync from Firebase
+  // Keep synced with Firebase
   db.ref(path).on("value", (snap) => {
     const val = snap.val();
-    if (val !== null) {
+
+    if (val !== null && Number(slider.value) !== val) {
       slider.value = val;
-      valueText.textContent = val;
+      valueText.textContent = formatValue(control, val);
     }
   });
 
@@ -71,7 +120,9 @@ function createPanel(channel) {
 
   panel.appendChild(title);
 
-  controls.forEach(c => panel.appendChild(createSlider(channel, c)));
+  controls.forEach(control => {
+    panel.appendChild(createSlider(channel, control));
+  });
 
   app.appendChild(panel);
 }

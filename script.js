@@ -1,4 +1,8 @@
-const firebaseConfig = {
+const ws = new WebSocket("ws://127.0.0.1:8080");
+
+ws.addEventListener("open", () => {
+  console.log("Connected to Streamer.bot");
+});const firebaseConfig = {
   apiKey: "AIzaSyDFC_FzA8r_TD03grYSGGfFubsE90xdU2s",
   authDomain: "twitch-knobs.firebaseapp.com",
   databaseURL: "https://twitch-knobs-default-rtdb.firebaseio.com",

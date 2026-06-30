@@ -6,13 +6,13 @@ const firebaseConfig = {
   storageBucket: "twitch-knobs.firebasestorage.app",
   messagingSenderId: "172717259045",
   appId: "1:172717259045:web:1f1c901facb66410fc82cc"
+
 };
 
-// INIT FIREBASE
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-console.log("Sliders initialized");
+console.log("Sliders connected");
 
 // -----------------------------
 // CHANNELS
@@ -34,7 +34,7 @@ const controls = [
 const app = document.getElementById("app");
 
 // -----------------------------
-// FORMAT DISPLAY
+// FORMAT
 // -----------------------------
 function format(control, value) {
   if (control.step === 1) return Math.round(value);
@@ -42,7 +42,7 @@ function format(control, value) {
 }
 
 // -----------------------------
-// CREATE SLIDER
+// SLIDER CREATION
 // -----------------------------
 function createSlider(channel, control) {
   const wrapper = document.createElement("div");
@@ -56,7 +56,7 @@ function createSlider(channel, control) {
   wrapper.innerHTML = `
     <div class="label-row">
       <span>${control.label}</span>
-      <span class="value" id="${id}-val">${format(control, defaultValue)}</span>
+      <span class="value" id="${id}-val">0.000</span>
     </div>
 
     <input
@@ -73,11 +73,13 @@ function createSlider(channel, control) {
   const display = wrapper.querySelector(".value");
 
   // -----------------------------
-  // SEND TO FIREBASE (SMOOTH)
+  // SEND TO FIREBASE (FORCED FLOAT)
   // -----------------------------
   slider.addEventListener("input", () => {
-    const value = Number(slider.value);
+    const value = parseFloat(slider.value);
+
     display.textContent = format(control, value);
+
     db.ref(path).set(value);
   });
 
@@ -88,11 +90,11 @@ function createSlider(channel, control) {
     const val = snap.val();
     if (val === null || val === undefined) return;
 
-    const num = Number(val);
+    const value = parseFloat(val);
 
-    if (!isNaN(num)) {
-      slider.value = num;
-      display.textContent = format(control, num);
+    if (!isNaN(value)) {
+      slider.value = value;
+      display.textContent = format(control, value);
     }
   });
 
@@ -100,7 +102,7 @@ function createSlider(channel, control) {
 }
 
 // -----------------------------
-// CREATE PANEL
+// PANEL CREATION
 // -----------------------------
 function createPanel(channel) {
   const panel = document.createElement("div");
@@ -119,6 +121,6 @@ function createPanel(channel) {
 }
 
 // -----------------------------
-// INIT APP
+// INIT
 // -----------------------------
 channels.forEach(createPanel);

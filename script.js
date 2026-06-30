@@ -1,147 +1,123 @@
-/* ===== Global ===== */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+// INIT FIREBASE
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+console.log("Sliders connected to Firebase");
+
+// -----------------------------
+// CONFIG
+// -----------------------------
+
+const channels = ["vox", "bass", "guitar", "snare"];
+
+const controls = [
+  { key: "r", label: "Red", min: 0, max: 1, step: 0.001 },
+  { key: "g", label: "Green", min: 0, max: 1, step: 0.001 },
+  { key: "b", label: "Blue", min: 0, max: 1, step: 0.001 },
+  { key: "x", label: "X Tweak", min: 0, max: 1, step: 0.001 },
+  { key: "y", label: "Y Tweak", min: 0, max: 1, step: 0.001 },
+  { key: "div", label: "Divisions", min: 2, max: 10, step: 1 }
+];
+
+const app = document.getElementById("app");
+
+// -----------------------------
+// HELPERS
+// -----------------------------
+
+function formatValue(control, value) {
+  if (control.step === 1) return Math.round(value);
+  return Number(value).toFixed(3);
 }
 
-body {
-    background: #181818;
-    color: #f2f2f2;
-    font-family: Arial, Helvetica, sans-serif;
-    padding: 30px;
-}
+function createControl(channel, control) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "control";
 
-/* ===== Header ===== */
+  const id = `${channel}-${control.key}`;
+  const path = `${channel}/${control.key}`;
 
-header {
-    text-align: center;
-    margin-bottom: 35px;
-}
+  const defaultValue = control.step === 1 ? 2 : 0;
 
-header h1 {
-    font-size: 42px;
-    margin-bottom: 8px;
-    color: #ffffff;
-}
+  wrapper.innerHTML = `
+    <div class="label-row">
+      <span>${control.label}</span>
+      <span class="value" id="${id}-val">${formatValue(control, defaultValue)}</span>
+    </div>
 
-header p {
-    color: #999;
-    font-size: 18px;
-}
+    <input
+      type="range"
+      id="${id}"
+      min="${control.min}"
+      max="${control.max}"
+      step="${control.step}"
+      value="${defaultValue}"
+    />
+  `;
 
-/* ===== Layout ===== */
+  const slider = wrapper.querySelector("input");
+  const valueText = wrapper.querySelector(".value");
 
-#app {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 25px;
-}
+  // -----------------------------
+  // SEND TO FIREBASE (SMOOTH)
+  // -----------------------------
+  slider.addEventListener("input", () => {
+    let value = Number(slider.value);
 
-/* ===== Channel Panel ===== */
+    // safety clamp
+    value = Math.min(control.max, Math.max(control.min, value));
 
-.panel {
-    background: #252525;
-    border-radius: 12px;
-    padding: 22px;
-    box-shadow: 0 0 18px rgba(0,0,0,.35);
-}
+    valueText.textContent = formatValue(control, value);
 
-.panel h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-}
+    db.ref(path).set(value);
+  });
 
-/* ===== Slider Rows ===== */
+  // -----------------------------
+  // RECEIVE FROM FIREBASE
+  // -----------------------------
+  db.ref(path).on("value", (snap) => {
+    const val = snap.val();
+    if (val === null || val === undefined) return;
 
-.slider-row {
-    margin-bottom: 18px;
-}
+    const num = Number(val);
 
-.slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.slider-header label {
-    font-size: 15px;
-    font-weight: bold;
-}
-
-.value {
-    color: #66d9ff;
-    font-family: monospace;
-    min-width: 60px;
-    text-align: right;
-}
-
-/* ===== Slider ===== */
-
-input[type=range] {
-    width: 100%;
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-}
-
-/* Chrome */
-
-input[type=range]::-webkit-slider-runnable-track {
-    height: 8px;
-    background: #444;
-    border-radius: 4px;
-}
-
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    margin-top: -6px;
-    border-radius: 50%;
-    background: #00c8ff;
-    cursor: pointer;
-    transition: .15s;
-}
-
-input[type=range]::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
-}
-
-/* Firefox */
-
-input[type=range]::-moz-range-track {
-    height: 8px;
-    background: #444;
-    border-radius: 4px;
-}
-
-input[type=range]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border: none;
-    border-radius: 50%;
-    background: #00c8ff;
-    cursor: pointer;
-}
-
-/* ===== Responsive ===== */
-
-@media (max-width: 700px) {
-
-    body {
-        padding: 18px;
+    if (!isNaN(num)) {
+      slider.value = num;
+      valueText.textContent = formatValue(control, num);
     }
+  });
 
-    header h1 {
-        font-size: 32px;
-    }
-
-    #app {
-        grid-template-columns: 1fr;
-    }
-
+  return wrapper;
 }
+
+// -----------------------------
+// BUILD UI
+// -----------------------------
+
+function createPanel(channel) {
+  const panel = document.createElement("div");
+  panel.className = "panel";
+
+  const title = document.createElement("h2");
+  title.textContent = channel.toUpperCase();
+
+  panel.appendChild(title);
+
+  controls.forEach(control => {
+    panel.appendChild(createControl(channel, control));
+  });
+
+  app.appendChild(panel);
+}
+
+channels.forEach(createPanel);

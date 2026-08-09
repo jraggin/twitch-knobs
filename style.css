@@ -1,1 +1,40 @@
-body { margin: 0; font-family: Arial, sans-serif; background: #111; color: #eee; } /* ============================= HEADER ============================= */ header { text-align: center; padding: 20px; } header h1 { margin: 0; font-size: 32px; } header p { margin: 8px 0 0; color: #888; } /* ============================= TWITCH STREAM ============================= */ .stream-container { width: calc(100% - 40px); max-width: 1200px; margin: 0 auto 30px auto; } .stream-container h2 { color: #00ffcc; margin: 0 0 10px 0; } /* 16:9 Twitch player */ .twitch-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border: 1px solid #333; border-radius: 10px; overflow: hidden; } /* Twitch iframe */ .twitch-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; } /* ============================= SLIDER GRID ============================= */ #app { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; width: calc(100% - 40px); max-width: 1200px; margin: 0 auto; padding-bottom: 40px; } /* ============================= CHANNEL PANELS ============================= */ .panel { background: #1c1c1c; padding: 20px; border-radius: 10px; border: 1px solid #333; box-sizing: border-box; } .panel h2 { margin-top: 0; margin-bottom: 20px; color: #00ffcc; font-size: 20px; } /* ============================= INDIVIDUAL CONTROLS ============================= */ .control { margin-bottom: 20px; } .control:last-child { margin-bottom: 0; } .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; } .label { font-size: 14px; } .value { color: #00ffcc; font-family: monospace; font-size: 14px; } /* ============================= SLIDERS ============================= */ input[type="range"] { display: block; width: 100%; margin: 0; box-sizing: border-box; accent-color: #00ffcc; cursor: pointer; } /* ============================= MOBILE ============================= */ @media (max-width: 700px) { header { padding: 15px; } header h1 { font-size: 26px; } .stream-container { width: calc(100% - 20px); } #app { width: calc(100% - 20px); grid-template-columns: 1fr; gap: 15px; } .panel { padding: 15px; } }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+}
+
+#app {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.panel {
+    background: #1c1c1c;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+.panel h2 {
+    margin-top: 0;
+    color: #00ffcc;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+input[type="range"] {
+    width: 100%;
+}

@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Knobs</title>
 
-    <title>Sliders</title>
-
-    <!-- Firebase -->
+    <!-- Firebase (compat version - matches script.js) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js"></script>
 
@@ -14,16 +13,9 @@
 </head>
 
 <body>
-
-    <header>
-        <h1>Sliders</h1>
-        <p>Realtime Ableton Control</p>
-    </header>
-
-    <!-- Twitch Stream --> <section class="stream-container"> <h2>Live Stream</h2> <div class="twitch-wrapper"> <iframe src="https://player.twitch.tv/?channel=jraggin&parent=jraggin.github.io&autoplay=false" allowfullscreen> </iframe> </div> </section> <!-- Controls -->
-    <main id="app"></main>
+    <h1>Twitch Knobs</h1>
+    <div id="app"></div>
 
     <script src="script.js"></script>
-
 </body>
 </html>
